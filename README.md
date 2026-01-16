@@ -23,7 +23,7 @@ data class User(
 }
 ```
 
-## What Makes This a Data Class?
+### What Makes This a Data Class?
 
 ### 1. The `data` Keyword
 
@@ -73,7 +73,7 @@ val (age, firstName, lastName) = user1  // Destructuring declaration
 - Only visible within the `User` class (marked as `private`)
 - Used for consistent name formatting
 
-## Usage Example
+### Usage Example
 
 ```kotlin
 fun main() {
@@ -99,7 +99,7 @@ fun main() {
 }
 ```
 
-## Key Points About Data Classes
+### Key Points About Data Classes
 
 1. **Immutability**: Properties are `val` by default (recommended for data classes)
 2. **Inheritance**: Data classes can inherit from other classes and implement interfaces
@@ -107,7 +107,7 @@ fun main() {
 4. **Component Functions**: Enable destructuring declarations
 5. **Copy Function**: Creates a modified copy of the object
 
-## When to Use Data Classes
+### When to Use Data Classes
 
 - When your class's main purpose is to hold data
 - When you need value-based equality
@@ -140,7 +140,7 @@ enum class Month(
 }
 ```
 
-## What Makes This an Enum Class?
+### What Makes This an Enum Class?
 
 ### 1. The `enum` Keyword
 
@@ -180,7 +180,7 @@ val january = Month.valueOf("JAN")
 - Can define methods that all enum constants share
 - Can override methods for specific constants
 
-## Usage Example
+### Usage Example
 
 ```kotlin
 fun main() {
@@ -224,7 +224,7 @@ private fun selectMonth(): Month {
 }
 ```
 
-## Key Points About Enum Classes
+### Key Points About Enum Classes
 
 1. **Type Safety**: Provides type-safe way to work with fixed sets of constants
 2. **Properties**: Can have properties with different values for each constant
@@ -232,12 +232,231 @@ private fun selectMonth(): Month {
 4. **Interfaces**: Can implement interfaces
 5. **When Expressions**: Work seamlessly with Kotlin's `when` expressions
 
-## When to Use Enum Classes
+### When to Use Enum Classes
 
 - When you have a fixed set of related constants
 - When you need type safety for a set of values
 - When each constant needs to have its own properties or behavior
 - When you need to iterate over all possible values
 - When you need to convert between strings and typed values
+
+---
+
+## Inheritance Using Interface Deep Dive
+
+### Basic Structure
+
+#### Interface Definition
+
+```kotlin
+// Person interface with default implementations for common properties and methods
+interface Person {
+    val age: Int
+    var lastName: String
+    val jobTitle: String
+    val firstName: String
+
+    // IsAdult computed property with default implementation
+    val isAdult: Boolean get() = age >= 18
+
+    // Name computed property with default implementation
+    val name: String get() = "${firstName.capitalizeText()} ${lastName.capitalizeText()}".trim()
+
+    // Work method with default implementation
+    fun work(): String {
+        return "$name is working as $jobTitle"
+    }
+
+    // Introduce method with default implementation
+    fun introduce(): String {
+        return "Hi, my name is $name and I work as $jobTitle"
+    }
+
+    // Private extension function for string formatting
+    private fun String.capitalizeText(): String {
+        return this.trim().lowercase().replaceFirstChar { it.uppercase() }
+    }
+}
+```
+
+### Implementation Classes
+
+#### Engineer Class
+
+```kotlin
+// Represents Engineer, a specialized type of Person with engineering-specific properties and behaviors.
+class Eng(
+    val field: String,                          // Engineering specialization field
+    override val age: Int,                      // Age from Person interface
+    override val firstName: String,             // First name from Person interface
+    override var lastName: String = "",         // Last name from Person interface with default empty string
+    override val jobTitle: String = "Engineer"  // Job title from Person interface with default "Engineer"
+) : Person {
+    // Work method from Person interface with engineer customized implementation
+    override fun work(): String {
+        return "$name is working as *$jobTitle*"
+    }
+
+    // Introduce method from Person interface with engineer customized implementation
+    override fun introduce(): String {
+        return "Hi, I'm Eng.$name, specialized in $field"
+    }
+}
+```
+
+#### Doctor Class
+
+```kotlin
+// Represents Doctor, a specialized type of Person with doctor-specific properties and behaviors.
+class Doc(
+    override val age: Int,                    // Age from Person interface
+    val speciality: String,                   // Speciality of the doctor
+    override val firstName: String,           // First name from Person interface
+    override var lastName: String = "",       // Last name from Person interface with default empty string
+    override val jobTitle: String = "Doctor"  // Job title from Person interface with default "Doctor"
+) : Person {
+    // Work method from Person interface with doctor customized implementation
+    override fun work(): String {
+        return "$name is working as *$jobTitle*"
+    }
+
+    // Introduce method from Person interface with doctor customized implementation
+    override fun introduce(): String {
+        return "Hi, I'm Dr.$name, specialized in $speciality"
+    }
+}
+```
+
+### What Makes This Interface-Based Inheritance?
+
+### 1. The `interface` Keyword
+
+- Defines a contract that implementing classes must fulfill
+- Can contain abstract properties and methods
+- Can provide default implementations for properties and methods
+- Supports multiple inheritance (a class can implement multiple interfaces)
+
+### 2. Interface Features
+
+#### a) Properties
+
+```kotlin
+val age: Int                  // Abstract property - must be implemented
+var lastName: String          // Mutable abstract property
+val isAdult: Boolean get()    // Computed property with default implementation
+```
+
+#### b) Methods with Default Implementations
+
+```kotlin
+fun work(): String {
+    return "$name is working as $jobTitle"
+}
+```
+
+#### c) Extension Functions
+
+```kotlin
+private fun String.capitalizeText(): String {
+    return this.trim().lowercase().replaceFirstChar { it.uppercase() }
+}
+```
+
+### 3. Implementation Classes Features
+
+#### a) Override Required Properties
+
+```kotlin
+override val age: Int
+override val firstName: String
+override var lastName: String = ""  // Can provide default values
+```
+
+#### b) Additional Properties
+
+```kotlin
+val field: String        // Engineer-specific property
+val speciality: String   // Doctor-specific property
+```
+
+#### c) Override Methods
+
+```kotlin
+override fun work(): String {
+    return "$name is working as *$jobTitle*"
+}
+```
+
+### Usage Example
+
+```kotlin
+fun main() {
+    // Create a list of different types of people using the Person interface
+    val team: List<Person> = listOf(
+        // Engineer with all properties
+        Eng(
+            age = 22,
+            lastName = "dayef",
+            firstName = "mourad",
+            field = "Software Engineering",
+            jobTitle = "Senior Software Engineer"  // Overriding default job title
+        ),
+
+        // Doctor with minimal required properties (using defaults for others)
+        Doc(
+            age = 22,
+            firstName = "ashraf",
+            speciality = "Dental Surgery",
+            // lastName will use default empty string
+            // jobTitle will use default "Doctor"
+        ),
+
+        // Another engineer with partial properties
+        Eng(
+            age = 17,  // Testing isAdult functionality
+            firstName = "ahmed",
+            field = "Mechanical Engineering",
+            // lastName will use default empty string
+            // jobTitle will use default "Engineer"
+        )
+    )
+
+    // Process each team member
+    team.forEach { member ->
+        // Demonstrate property access
+        val title = when (member) {
+            is Eng -> "Engineer in ${member.field}"
+            is Doc -> "Doctor specialized in ${member.speciality}"
+            else -> "Team Member"
+        }
+
+        // Demonstrate method calls from the interface
+        val workStatus = member.work()
+        val introduction = member.introduce()
+        val adultStatus = if (member.isAdult) "an adult" else "not an adult"
+
+        // Format the output
+        println("|${"-".repeat(n = 75)}\n|Name: ${member.name}\n|Age: ${member.age} years old ($adultStatus)\n|$workStatus\n|Title: $title\n|$introduction")
+    }
+}
+```
+
+## Key Points About Interface-Based Inheritance
+
+1. **Polymorphism**: Different classes can be treated as the same type through the interface
+2. **Default Implementations**: Interfaces can provide default method implementations
+3. **Multiple Inheritance**: A class can implement multiple interfaces
+4. **Contract**: Interfaces define a contract that implementing classes must fulfill
+5. **Flexibility**: Classes can override default implementations with custom behavior
+6. **Type Safety**: Using interface types enables type-safe polymorphic collections
+
+## When to Use Interface-Based Inheritance
+
+- When you need to define a common contract for multiple unrelated classes
+- When you want to provide default behavior that can be selectively overridden
+- When you need multiple inheritance (a class implementing multiple interfaces)
+- When you want to achieve polymorphism without using abstract classes
+- When different classes share common behavior but have different implementations
+- When you need to group different types under a common type for collections
 
 ---
