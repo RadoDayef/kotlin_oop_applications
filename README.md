@@ -115,3 +115,129 @@ fun main() {
 - When you need to create modified copies of objects
 
 ---
+
+## Enum Class Deep Dive
+
+### Basic Structure
+
+```kotlin
+enum class Month(
+    val title: String,        // Primary constructor property
+    val subTitle: String,     // Primary constructor property
+    val description: String,  // Primary constructor property
+) {
+    JAN(
+        title = "January",
+        subTitle = "The beginning of the year.",
+        description = "A month of new starts, goals, motivation, and fresh energy."
+    ),
+    // ... other months ...
+    DEC(
+        title = "December",
+        subTitle = "The closing chapter of the year.",
+        description = "Associated with family, reflection, celebration, and hope."
+    )
+}
+```
+
+## What Makes This an Enum Class?
+
+### 1. The `enum` Keyword
+
+- Defines a fixed set of constants (enumerated types)
+- Each constant is an instance of the enum class
+- Can have properties, methods, and implement interfaces
+- Can have a constructor to initialize each constant
+
+### 2. Auto-generated Members
+
+#### a) `name` and `ordinal`
+
+```kotlin
+val month = Month.DEC
+println(month.name)     // "DEC"
+println(month.ordinal)  // 11 (position in declaration order)
+```
+
+#### b) `values()` and `valueOf()`
+
+```kotlin
+// Get all enum constants
+val allMonths = Month.values()
+
+// Get enum constant by name
+val january = Month.valueOf("JAN")
+```
+
+### 3. Class Body Features
+
+#### a) Properties
+- Each enum constant has its own set of property values
+- Properties are defined in the primary constructor
+- Can be accessed like regular class properties
+
+#### b) Methods
+- Can define methods that all enum constants share
+- Can override methods for specific constants
+
+## Usage Example
+
+```kotlin
+fun main() {
+    // Display all months
+    println("All months: ${Month.entries}")
+
+    // Select month to display its information
+    val month = selectMonth()
+
+    // Display position in its enum declaration
+    println("Ordinal: ${month.ordinal}")
+
+    // Displays information about the selected month
+    println("${month.name}: ${month.title} - ${month.subTitle}\nDescription: ${month.description}".trimIndent())
+}
+
+// Prompts the user to select a month by number
+private fun selectMonth(): Month {
+    while (true) {
+        print("Enter month number (1-12): ")
+        val input = readlnOrNull()?.trim() ?: continue
+
+        // Handle empty input
+        if (input.isBlank()) {
+            println("Please enter a month number")
+            continue
+        }
+
+        // Try to convert input to a month number
+        val monthNumber = input.toIntOrNull() ?: run {
+            println("Please enter a valid number")
+            return@run null
+        } ?: continue
+
+        // Get the corresponding month or show error
+        return Month.entries.getOrNull(monthNumber - 1) ?: run {
+            println("Please enter a number between 1 and 12")
+            return@run null
+        } ?: continue
+    }
+}
+```
+
+## Key Points About Enum Classes
+
+1. **Type Safety**: Provides type-safe way to work with fixed sets of constants
+2. **Properties**: Can have properties with different values for each constant
+3. **Methods**: Can define methods that all constants share
+4. **Interfaces**: Can implement interfaces
+5. **When Expressions**: Work seamlessly with Kotlin's `when` expressions
+
+## When to Use Enum Classes
+
+- When you have a fixed set of related constants
+- When you need type safety for a set of values
+- When each constant needs to have its own properties or behavior
+- When you need to iterate over all possible values
+- When you need to convert between strings and typed values
+
+---
